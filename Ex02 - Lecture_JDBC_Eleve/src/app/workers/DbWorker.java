@@ -22,10 +22,11 @@ public class DbWorker implements DbWorkerItf {
 
     @Override
     public void connecterBdMySQL(String nomDB) throws MyDBException {
-        final String url_local = "jdbc:mysql://localhost:3306/" + nomDB;
-        final String url_remote = "jdbc:mysql://LAPEMFB37-21.edu.net.fr.ch:3306/" + nomDB;
+//        final String url_local = "jdbc:mysql://localhost:3306/" + nomDB;
+//        final String url_remote = "jdbc:mysql://LAPEMFB37-21.edu.net.fr.ch:3306/" + nomDB;
+        final String url_remote = "jdbc:mysql://localhost:3306/" + nomDB;
         final String user = "root";
-        final String password = "emf123";
+        final String password = "Emf123";
 
         System.out.println("url:" + url_remote);
         try {
@@ -72,21 +73,52 @@ public class DbWorker implements DbWorkerItf {
 
     public List<Personne> lirePersonnes() throws MyDBException {
         listePersonnes = new ArrayList<>();
-        
+
+        try ( Statement st = dbConnexion.createStatement()) {
+            ResultSet rs = st.executeQuery("select prenom, nom from t_personne");
+
+            while (rs.next()) {
+                Personne p = new Personne(rs.getString("NOM"), rs.getString("PRENOM"));
+                listePersonnes.add(p);
+            }
+        } catch (SQLException ex) {
+            throw new MyDBException(SystemLib.getFullMethodName(), ex.getMessage());
+        }
+
         return listePersonnes;
     }
 
     @Override
     public Personne precedentPersonne() throws MyDBException {
+        Personne actu = null;
+        if (listePersonnes == null) {
+            lirePersonnes();
+        }
+        if (listePersonnes != null) {
+            if (index >= 1) {
+                index = index - 1;
+            }
+        }
+        actu = listePersonnes.get(index);
 
-        return null;
+        return actu;
 
     }
 
     @Override
     public Personne suivantPersonne() throws MyDBException {
+        Personne actu = null;
+        if (listePersonnes == null) {
+            lirePersonnes();
+        }
+        if (listePersonnes != null) {
+            if (index >= 0 && index<listePersonnes.size()-1) {
+                index = index + 1;
+            }
+        }
+        actu = listePersonnes.get(index);
 
-        return null;
+        return actu;
 
     }
 
